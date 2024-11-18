@@ -1,0 +1,34 @@
+﻿@model HedonismBlog.ViewModels.UserViewModel
+
+@{
+    ViewData["Title"] = "UserDataEdited";
+}
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+<h2>User data updated</h2>
+<form method="post" asp-controller="User" asp-action="SubmitUpdate">
+    <div asp-validation-summary="ModelOnly"></div>
+    <div>
+        <label asp-for="Email"></label><br />
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label><br />
+        <input asp-for="Password" />
+        <span asp-validation-for="Password"></span>
+    </div>
+    <div>
+        <input type="hidden" asp-for="RoleName" />
+    </div>
+
+    <div>
+        <input type="submit" value="Update" />
+    </div>
+    <div>
+        <a href="@Url.Action("GetAll", "Post")">Back to post list</a>
+    </div>
+</form>

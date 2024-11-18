@@ -1,0 +1,42 @@
+﻿@using System.Security.Claims
+@model List<HedonismBlog.ViewModels.RoleViewModel>
+
+@{
+    ViewData["Title"] = "ExistingRoles";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+
+<h2>Existing Roles</h2>
+<div class="container">
+    @if (User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "administrator")
+    {
+        <div>
+            <a href="@Url.Action("Create", "Role")">Add new role</a>
+        </div>
+    }
+    @foreach (var role in Model)
+    {
+        <div class="col-md-12 mb-2 custom-card">
+            <div class="card">
+                <div class="card-body custom-card-padding">
+                    <div>
+                        <h6 class="card-title">@role.Name</h6>
+                        <h class="card-text">@role.Description</h>
+                    </div>
+                    <div>
+                        @if (User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "administrator")
+                        {
+                            <a href="@Url.Action("Edit", "Role", new { id = role.Id })" class="btn btn-outline-warning">Edit</a>
+                            @if (role.Name != "administrator" && role.Name != "moderator" && role.Name != "user" )
+                            {
+                                <a href="@Url.Action("Delete", "Role", new { id = role.Id })" class="btn btn-outline-danger">Delete</a>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

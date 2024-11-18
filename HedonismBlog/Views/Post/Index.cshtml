@@ -1,0 +1,49 @@
+﻿@using System.Security.Claims
+@model List<HedonismBlog.ViewModels.PostViewModel>
+
+@{
+    ViewData["Title"] = "AllPosts";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+
+<h2>All posts</h2>
+<div class="container">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div>
+            <a href="@Url.Action("Create", "Post")">Add new post</a>
+        </div>
+    }
+    @foreach (var post in Model)
+    {
+        <div class="col-md-12 mb-2 custom-card">
+            <div class="card">
+                <div class="card-body custom-card-padding">
+                    <div>
+                        <h class="card-text">@post.UserEmail</h>
+                    </div>
+                    <div>
+                        <h5 class="card-title"><a href="@Url.Action("View", "Post", new { id = post.Id })">@post.Title</a></h5>
+                    </div>
+                    <div>
+                    @foreach (var tag in post.Tags)
+                    {
+                            <span class="badge bg-secondary text-light rounded-pill">@tag.Text</span>
+                    }
+                    </div>
+                    <div>
+                        @if (User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "administrator" ||
+                        User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "moderator" ||
+                       User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value == post.UserEmail)
+                        {
+                            <a href="@Url.Action("Edit", "Post", new { id = post.Id })" class="btn btn-outline-warning">Edit</a>
+                            <a href="@Url.Action("Delete", "Post", new { id = post.Id })" class="btn btn-outline-danger">Delete</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

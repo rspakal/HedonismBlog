@@ -1,0 +1,26 @@
+﻿@model List<HedonismBlog.ViewModels.UserViewModel>
+
+@{
+    ViewData["Title"] = "AllUsers";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+
+<h2>All users</h2>
+<div class="row">
+    @foreach (var user in Model)
+    {
+        <div class="col-md-12 mb-2 custom-card">
+            <div class="card">
+                @* <img class="card-img-top" src="@card.ImageUrl" alt="Card image cap"> *@
+                <div class="card-body">
+                    <h6 class="card-title"><a href="@Url.Action("AssignRole", "User", new { id = user.Id })">@user.Email</a></h6>
+                    <div>
+                        <span class="badge rounded-pill">@user.RoleName</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

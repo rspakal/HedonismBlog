@@ -1,0 +1,41 @@
+﻿@using System.Security.Claims
+@model List<HedonismBlog.ViewModels.TagViewModel>
+
+@{
+    ViewData["Title"] = "AllTags";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+
+<h2>Existing tags</h2>
+<div class="container">
+    @if (User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "administrator" ||
+    User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "moderator")
+    {
+        <div>
+            <a href="@Url.Action("Create", "Tag")">Add new tag</a>
+        </div>
+    }
+    @foreach (var tag in Model)
+    {
+        <div class="col-md-12 mb-2 custom-card">
+            <div class="card">
+                <div class="card-body custom-card-padding">
+                    <div>
+                        <h class="card-text">@tag.Text</h>
+                    </div>
+                    <div>
+                        @if (User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "administrator" ||
+                       User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "moderator")
+                        {
+                            <a href="@Url.Action("Edit", "Tag", new { id = tag.Id })" class="btn btn-outline-warning">Edit</a>
+                            <a href="@Url.Action("Delete", "Tag", new { id = tag.Id })" class="btn btn-outline-danger">Delete</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

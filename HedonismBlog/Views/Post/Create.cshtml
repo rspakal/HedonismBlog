@@ -1,0 +1,48 @@
+﻿@model HedonismBlog.ViewModels.PostViewModel
+
+@{
+    ViewData["Title"] = "CreatePost";
+}
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+<h2>Create new Post</h2>
+<div class="container">
+<form method="post" asp-controller="Post" asp-action="SubmitCreate">
+    <div asp-validation-summary="ModelOnly"></div>
+     <div class="form-group">
+        @for (int i = 0; i < Model.Tags.Count; i++)
+        {
+            <div>
+                <input type="checkbox" asp-for="@Model.Tags[i].IsSelected" />
+                <label>@Model.Tags[i].Text</label>
+                <input type="hidden" asp-for="@Model.Tags[i].Text" />
+                <input type="hidden" asp-for="@Model.Tags[i].Id" />
+            </div>
+        }
+    </div>
+
+        <div class="form-group">
+        <label asp-for="Title"></label><br />
+        <input class="form-control" asp-for="Title" />
+        <span asp-validation-for="Title"></span>
+    </div>
+        <div class="form-group">
+        <label asp-for="Content"></label><br />
+            <textarea class="form-control" rows="10" asp-for="Content"></textarea>
+        <span asp-validation-for="Content"></span>
+    </div>
+    <div>
+        <input type="hidden" asp-for="UserEmail" />
+    </div>
+
+        <div class="form-group">
+            <input class="btn btn-outline-success" type="submit" value="Create" />
+        </div>
+    <div>
+        <a href="@Url.Action("Index", "Post")">Back to post list</a>
+    </div>
+</form>
+</div>

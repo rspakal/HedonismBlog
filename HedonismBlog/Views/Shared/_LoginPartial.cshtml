@@ -1,0 +1,28 @@
+﻿@using System.Security.Claims
+
+<ul class="navbar-nav flex-grow-1 justify-content-end">
+    <li class="nav-item">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a class="nav-link text-dark" asp-area="" asp-controller="authentication" asp-action="Logout">LogOut</a>
+        }
+        else
+        {
+            <a class="nav-link text-dark" asp-area="" asp-controller="authentication" asp-action="Login">LogIn</a>
+        }
+    </li>
+    @if(User.Identity.IsAuthenticated)
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Info">@User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value</a>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-controller="registration" asp-action="Register">Register</a>
+        </li>
+    }
+
+    </ul>
+@* <p>@User.Identity.IsAuthenticated.ToString()</p> *@

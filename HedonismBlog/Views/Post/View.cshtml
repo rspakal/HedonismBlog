@@ -1,0 +1,85 @@
+﻿@using System.Security.Claims
+@model HedonismBlog.ViewModels.PostViewModel
+
+@{
+    ViewData["Title"] = "ViewPost";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+<script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputField = document.getElementById('commentInputField');
+        const submitButton = document.getElementById('submitAddComment');
+        inputField.addEventListener('input', () => {
+            if (inputField.value.length < 1) {
+                submitButton.disabled = true;
+            }
+            else {
+                submitButton.disabled = false;
+            }
+        });
+    });
+</script>
+
+<h2>@Model.Title</h2>
+<div class="container">
+    <div>
+        @foreach (var tag in Model.Tags)
+        {
+            <span class="badge rounded-pill">@tag.Text</span>
+        }
+        </div>
+    <div class="col-md-12">
+        <p class="post-content">@Model.Content</p>
+    </div>
+    @foreach (var comment in Model.Comments)
+    {
+        <div class="col-md-12 mb-2 custom-card">
+            <div class="card">
+                <div class="card-body custom-card-padding">
+                    <div>
+                        <h6 class="card-title">@comment.UserEmail</h6>
+                        <h6 class="card-subtitle text-muted small">@comment.TimeStamp</h6>
+                    </div>
+                    <div>
+                        <h class="card-text">@comment.Content</h>
+                    </div>
+                    <div>
+                        @if (User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "administrator" ||
+                       User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "moderator" ||
+                       User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value == comment.UserEmail)
+                        {
+                            <a href="@Url.Action("Edit", "Comment", new { id = comment.Id })" class="btn btn-outline-warning">Edit</a>
+                            <a href="@Url.Action("Delete", "Comment", new { id = comment.Id })" class="btn btn-outline-danger">Delete</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+@if (User.Identity.IsAuthenticated)
+{
+        <div class="form-group">
+            <form method="post" asp-controller="Comment" asp-action="Create">
+                <div asp-validation-summary="ModelOnly"></div>
+                <div>
+@*                     <label>Comment</label>
+ *@                    <textarea class="form-control" id="commentInputField" asp-for="NewComment.Content" placeholder="Write ur comment"></textarea>
+                    <span asp-validation-for="NewComment.Content"></span>
+                </div>
+                <div>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="Title" />
+                    <input type="hidden" asp-for="Content" />
+                </div>
+                <div class="form-group">
+                    <input class="btn btn-outline-success" type="submit" id="submitAddComment" disabled value="Add" />
+                </div>
+            </form>
+        </div>
+}
+<div>
+    <a href="@Url.Action("Index", "Post")">Back to posts list</a>
+</div>
+</div>

@@ -1,0 +1,31 @@
+﻿@model HedonismBlog.ViewModels.UserViewModel
+
+@{
+    ViewData["Title"] = "AssignUserRole";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+
+<h2>Assign role</h2>
+<div>
+    <h4>@Model.Email</h4>
+</div>
+<div>
+    <h6>@ViewBag.Message</h6>
+</div>
+<form method="post" asp-controller="User" asp-action="SubmitAssignRole">
+    <div asp-validation-summary="ModelOnly"></div>
+     <div>
+        @foreach (var role in Model.Roles)
+        {
+            <input type="radio" asp-for="RoleName" value="@role.Name" /> @role.Name <br />
+        }
+    </div>
+    <div>
+        <input type="hidden" asp-for="Id" />
+    </div>
+    <div class="form-group">
+        <input class="btn btn-outline-success" type="submit" value="Assign" />
+    </div>
+</form>

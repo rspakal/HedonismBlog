@@ -1,0 +1,50 @@
+﻿@model HedonismBlog.ViewModels.PostViewModel
+
+@{
+    ViewData["Title"] = "EditPost";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+
+<h2>Edit Post</h2>
+<form method="post" asp-controller="Post" asp-action="SubmitEdit">
+    <div asp-validation-summary="ModelOnly"></div>
+     <div>
+        @for (int i = 0; i < Model.Tags.Count; i++)
+        {
+            <div>
+                <input type="checkbox" asp-for="@Model.Tags[i].IsSelected" />
+                <label>@Model.Tags[i].Text</label>
+                <input type="hidden" asp-for="@Model.Tags[i].Text" />
+                <input type="hidden" asp-for="@Model.Tags[i].Id" />
+            </div>
+        }
+        @*          <input type="checkbox" id="option1" name="options" value="option1"></input>
+         <label for="option1">Option1</label> *@
+    </div>
+
+    <div>
+        <label asp-for="Title"></label><br />
+        <input maxlength="50" asp-for="Title" />
+        <span asp-validation-for="Title"></span>
+    </div>
+    <div>
+        <label asp-for="Content"></label><br />
+        <textarea asp-for="Content"></textarea>
+        <span asp-validation-for="Content"></span>
+    </div>
+    <div>
+        <input type="hidden" asp-for="Id" />
+    </div>
+    <div>
+        <input type="hidden" asp-for="UserEmail" />
+    </div>
+
+    <div>
+        <input type="submit" value="Save" />
+    </div>
+    <div>
+        <a href="@Url.Action("Index", "Post")">Back to post list</a>
+    </div>
+</form>
