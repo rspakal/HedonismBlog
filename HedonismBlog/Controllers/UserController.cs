@@ -1,20 +1,14 @@
 ﻿using AutoMapper;
+using BlogDALLibrary.Models;
+using BlogDALLibrary.Repositories;
 using HedonismBlog.ViewModels;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Security.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using BlogDALLibrary.Repositories;
-using BlogDALLibrary.Models;
 
 namespace HedonismBlog.Controllers
 {
@@ -64,7 +58,7 @@ namespace HedonismBlog.Controllers
         {
             var contextUser = HttpContext.User;
             var email = contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var user = await _userRepository.GetByEmail(email);
+            var user = await _userRepository.Get(email);
             var userViewModel = _mapper.Map<UserViewModel>(user);
             return View(userViewModel);
         }

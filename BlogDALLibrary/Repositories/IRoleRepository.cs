@@ -8,8 +8,7 @@ namespace BlogDALLibrary.Repositories
     public interface IRoleRepository
     {
         public Task Create(Role role);
-        public Task<IEnumerable<Role>> GetAllAsync();
-        public IEnumerable<Role> GetAll();
+        public Task<IEnumerable<Role>> GetAll();
 
         public Task<Role> GetById(int id);
         public Task<Role> GetByName(string name);

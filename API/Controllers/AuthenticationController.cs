@@ -1,4 +1,4 @@
-﻿using API.APIModels;
+﻿using API.APIModels.User;
 using AutoMapper;
 using BlogDALLibrary.Models;
 using BlogDALLibrary.Repositories;
@@ -26,6 +26,10 @@ namespace API.Controllers
 
         private string CreateToken(User user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user), "Argument 'User' is null");
+            }
             var claims = new[]
             {
                 new Claim(ClaimTypes.Email, user.Email),
@@ -48,7 +52,7 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginAPIModel userLoginAPIModel)
         {
-            var _user = await _userRepository.GetByEmail(userLoginAPIModel.Email);
+            var _user = await _userRepository.Get(userLoginAPIModel.Email);
             if (_user == null || _user.Password != userLoginAPIModel.Password) 
             {
                 return Unauthorized(new { message = "Wrong email or password." });

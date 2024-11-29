@@ -46,7 +46,7 @@ namespace HedonismBlog.Controllers
             }
             var post = await _postRepository.Get(postViewModel.Id);
             var userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var user = await _userRepository.GetByEmail(userEmail);
+            var user = await _userRepository.Get(userEmail);
             var comment = _mapper.Map<Comment>(postViewModel.NewComment);
             comment.User = user;
             comment.Post = post;
@@ -58,7 +58,7 @@ namespace HedonismBlog.Controllers
 
         public IActionResult Get(int id)
         {
-            var comment = _commentRepository.GetById(id);
+            var comment = _commentRepository.Get(id);
             return View(comment);
         }
 
@@ -76,7 +76,7 @@ namespace HedonismBlog.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var comment = await _commentRepository.GetById(id);
+            var comment = await _commentRepository.Get(id);
             var postId = comment.PostId;
             await _commentRepository.Delete(id);
             _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' deleted comment");

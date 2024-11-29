@@ -29,7 +29,7 @@ namespace API.Controllers
         {
             try
             {
-                var _roles = await _roleRepository.GetAllAsync();
+                var _roles = await _roleRepository.GetAll();
                 var _roleAPIModels = _mapper.Map<List<RoleAPIModel>>(_roles);
                 return Ok(_roleAPIModels);
             }

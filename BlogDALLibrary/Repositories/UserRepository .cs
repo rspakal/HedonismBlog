@@ -36,10 +36,25 @@ namespace BlogDALLibrary.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public async Task<User> GetByEmail(string email)
+        public async Task<User> Get(string email)
         {
             return await _context.Users
                 .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == email.ToLower());
+        }
+
+        public async Task<User> GetAsNoTracking(int id)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .AsNoTracking().
+                FirstOrDefaultAsync(u => u.Id == id);
+        }
+        public async Task<User> GetAsNoTracking(string email)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email.ToLower());
         }
 
@@ -54,12 +69,11 @@ namespace BlogDALLibrary.Repositories
 
         public async Task<User> Update(User user)
         {
-            var _user = await GetByEmail(user.Email);
+            var _user = await Get(user.Email);
             if (_user == null) 
             {
                 return null;
             }
-            //_user.Email = user.Email;
             _user.Password = user.Password;
             _context.Users.Update(_user);
             await _context.SaveChangesAsync();

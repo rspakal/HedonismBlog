@@ -43,7 +43,7 @@ namespace HedonismBlog.Controllers
             {
                 return View("Login");
             }
-            var user = await _userRepository.GetByEmail(viewModel.Email);
+            var user = await _userRepository.Get(viewModel.Email);
             if (user == null)
             {
                 ViewBag.Message = $"No user with '{viewModel.Email}' email is registered";

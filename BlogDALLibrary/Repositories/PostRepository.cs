@@ -59,8 +59,10 @@ namespace BlogDALLibrary.Repositories
 
         public async Task<IEnumerable> GetAll()
         {
-            return await _context.Posts.Include(p => p.Tags).ToListAsync();
-            //return await _context.Posts.ToListAsync();
+            return await _context.Posts
+                .Include(p => p.Tags)
+                .Include(p => p.User)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable> GetAllAsNoTracking()
@@ -68,8 +70,8 @@ namespace BlogDALLibrary.Repositories
             return await _context.Posts
                 .Include(p => p.Tags)
                 .Include(p => p.User)
-                .AsNoTracking().ToListAsync();
-            //return await _context.Posts.ToListAsync();
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<IEnumerable> GetByUserId(int userId)

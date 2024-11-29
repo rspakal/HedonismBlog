@@ -58,30 +58,18 @@ namespace API.Controllers
         public async Task<IActionResult> Update(TagAPIModel tagAPIModel)
         {
             var _tag = _mapper.Map<Tag>(tagAPIModel);
-            try
-            {
-                await _tagRepository.Update(_tag);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server internal error: {ex.Message}");
 
-            }
+            await _tagRepository.Update(_tag);
+            return Ok();
+
         }
 
         [HttpDelete("tag/delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                await _tagRepository.Delete(id);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server internal error: {ex.Message}");
-            }
+            await _tagRepository.Delete(id);
+            return Ok();
+
         }
     }
 }

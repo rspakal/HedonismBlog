@@ -1,4 +1,4 @@
-﻿using API.APIModels;
+﻿using API.APIModels.User;
 using AutoMapper;
 using BlogDALLibrary.Models;
 using BlogDALLibrary.Repositories;
@@ -27,7 +27,7 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegistrationAPIModel userRegistrationAPIModel )
         {
-            if ((await _userRepository.GetByEmail(userRegistrationAPIModel.Email)) != null)
+            if ((await _userRepository.Get(userRegistrationAPIModel.Email)) != null)
             {
                 return Conflict(new { message = "User with that email is already exists" });
             }
@@ -37,7 +37,7 @@ namespace API.Controllers
             var _user = _mapper.Map<User>(userRegistrationAPIModel);
             _user.Role = role;
             await _userRepository.Create(_user);
-            return Ok(new { message = "New user registered" });
+            return Ok();
         }
     }
 }

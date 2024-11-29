@@ -40,7 +40,7 @@ namespace HedonismBlog.Controllers
                 return View(viewModel);
             }
 
-            if ((await _userRepository.GetByEmail(viewModel.Email)) != null)
+            if ((await _userRepository.Get(viewModel.Email)) != null)
             {
                 ViewBag.Message = $"The user with '{viewModel.Email}' address is already exist";
                 return View("Register");

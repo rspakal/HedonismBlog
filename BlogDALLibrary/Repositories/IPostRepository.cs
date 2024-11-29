@@ -11,7 +11,6 @@ namespace BlogDALLibrary.Repositories
         public Task<Post> GetAsNoTracking(int id);
         public Task<IEnumerable> GetAll();
         public Task<IEnumerable> GetAllAsNoTracking();
-        public Task<IEnumerable> GetByUserId(int userId);
         public Task<Post> Update(Post post);
         public Task Delete(int id);
         public Task Delete(Post post);

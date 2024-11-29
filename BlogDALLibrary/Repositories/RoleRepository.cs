@@ -31,13 +31,9 @@ namespace BlogDALLibrary.Repositories
         {
             return await _context.Roles.FirstOrDefaultAsync(r => r.Name == name);
         }
-        public async Task<IEnumerable<Role>> GetAllAsync()
+        public async Task<IEnumerable<Role>> GetAll()
         {
             return await _context.Roles.ToListAsync();
-        }
-        public IEnumerable<Role> GetAll()
-        {
-            return _context.Roles.ToList();
         }
         public Task<IEnumerable> GetAllUsers(Role role)
         {

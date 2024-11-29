@@ -80,7 +80,7 @@ namespace HedonismBlog.Controllers
             {
                 return View("Create", postViewModel);
             }
-            var user = await _userRepository.GetByEmail(postViewModel.UserEmail);
+            var user = await _userRepository.Get(postViewModel.UserEmail);
             postViewModel.Tags = postViewModel.Tags.Where(t => t.IsSelected == true).ToList();
             var post = _mapper.Map<Post>(postViewModel);
             post.User = user;
@@ -116,7 +116,7 @@ namespace HedonismBlog.Controllers
             {
                 return View("Edit", postViewModel);
             }
-            var user = await _userRepository.GetByEmail(postViewModel.UserEmail);
+            var user = await _userRepository.Get(postViewModel.UserEmail);
             postViewModel.Tags = postViewModel.Tags.Where(t => t.IsSelected == true).ToList();
             var post = _mapper.Map<Post>(postViewModel);
             post.User = user;
@@ -136,11 +136,6 @@ namespace HedonismBlog.Controllers
             return View(allPosts);
         }
 
-        public IActionResult GetByUserId(int userId) 
-        {
-            var userPosts = _postRepository.GetByUserId(userId);
-            return View(userPosts);
-        }
 
         [Authorize]
         public IActionResult Update(Post post)
