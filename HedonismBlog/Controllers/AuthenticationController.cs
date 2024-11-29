@@ -56,7 +56,7 @@ namespace HedonismBlog.Controllers
                 return View("Login");
             }
 
-            var claims = new List<Claim>
+            var claims = new List<Claim> 
             {
                 new Claim(ClaimTypes.Role, user.Role.Name),
                 new Claim(ClaimTypes.Email, user.Email)
