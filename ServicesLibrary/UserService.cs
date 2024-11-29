@@ -40,7 +40,7 @@ namespace ServicesLibrary
                 throw new NullReferenceException($"No role with the name \"user\" in DB");
             _user = _mapper.Map<User>(userRegistrationModel);
             _user.Role = _role;
-            await _userRepository.Create(_user);
+            await _userRepository.Create(_user); 
         }
     }
 }
