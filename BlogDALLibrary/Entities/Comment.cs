@@ -1,4 +1,4 @@
-﻿namespace BlogDALLibrary.Models
+﻿namespace BlogDALLibrary.Entities
 {
     public class Comment
     {

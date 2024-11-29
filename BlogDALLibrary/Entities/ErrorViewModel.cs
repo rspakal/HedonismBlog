@@ -1,6 +1,6 @@
 using System;
 
-namespace HedonismBlog.Models
+namespace HedonismBlog.Entities
 {
     public class ErrorViewModel
     {

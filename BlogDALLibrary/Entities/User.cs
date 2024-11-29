@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BlogDALLibrary.Models
+namespace BlogDALLibrary.Entities
 {
     public class User
     {

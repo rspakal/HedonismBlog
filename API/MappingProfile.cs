@@ -3,7 +3,7 @@ using API.APIModels.Comment;
 using API.APIModels.Post;
 using API.APIModels.User;
 using AutoMapper;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 using BlogDALLibrary.Repositories;
 using System.Collections.Generic;
 namespace API

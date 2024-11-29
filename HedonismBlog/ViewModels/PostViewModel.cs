@@ -1,5 +1,4 @@
-﻿using HedonismBlog.Models;
-using HedonismBlog.ViewModels.Validation;
+﻿using HedonismBlog.ViewModels.Validation;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

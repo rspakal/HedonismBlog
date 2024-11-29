@@ -1,5 +1,5 @@
 ﻿
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 using BlogDALLibrary.Repositories;
 using HedonismBlog.ViewModels;
 using Microsoft.AspNetCore.Authorization;

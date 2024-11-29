@@ -1,5 +1,5 @@
 ﻿using API.APIModels.Comment;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 using System.Collections.Generic;
 
 namespace API.APIModels.Post

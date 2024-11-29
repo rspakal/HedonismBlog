@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 using System.IO;
 
 namespace BlogDALLibrary

@@ -1,4 +1,4 @@
-﻿using BlogDALLibrary.Models;
+﻿using BlogDALLibrary.Entities;
 using System.Collections;
 using System.Threading.Tasks;
 

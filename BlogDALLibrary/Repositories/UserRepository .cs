@@ -1,10 +1,9 @@
-﻿using HedonismBlog.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 
 
 namespace BlogDALLibrary.Repositories

@@ -1,6 +1,4 @@
-﻿using BlogDALLibrary.Models;
-
-namespace API.APIModels.User
+﻿namespace API.APIModels.User
 {
     public class UserRegistrationAPIModel
     {

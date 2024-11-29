@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 using HedonismBlog.ViewModels;
 
 namespace HedonismBlog

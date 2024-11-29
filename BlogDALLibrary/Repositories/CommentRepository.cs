@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using System.Threading.Tasks;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 using BlogDALLibrary;
 
 namespace BlogDALLibrary.Repositories

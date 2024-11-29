@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Threading.Tasks;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 
 namespace BlogDALLibrary.Repositories
 {

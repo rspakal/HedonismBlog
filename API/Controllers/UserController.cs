@@ -1,6 +1,6 @@
 ﻿using API.APIModels.User;
 using AutoMapper;
-using BlogDALLibrary.Models;
+using BlogDALLibrary.Entities;
 using BlogDALLibrary.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
