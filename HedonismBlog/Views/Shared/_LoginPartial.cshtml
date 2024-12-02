@@ -14,7 +14,7 @@
     @if(User.Identity.IsAuthenticated)
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Info">@User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value</a>
+            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Account">@User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value</a>
         </li>
     }
     else

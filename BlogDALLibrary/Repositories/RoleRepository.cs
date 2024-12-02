@@ -2,9 +2,7 @@
 using BlogDALLibrary.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlogDALLibrary.Repositories
@@ -23,26 +21,17 @@ namespace BlogDALLibrary.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Role> GetById(int id)
+        public async Task<Role> Get(int id)
         {
             return await _context.Roles.FindAsync(id);
         }
-        public async Task<Role> GetByName(string name)
+        public async Task<Role> Get(string name)
         {
             return await _context.Roles.FirstOrDefaultAsync(r => r.Name == name);
         }
         public async Task<IEnumerable<Role>> GetAll()
         {
             return await _context.Roles.ToListAsync();
-        }
-        public Task<IEnumerable> GetAllUsers(Role role)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public async Task<Role> GetRolesByName(string Name)
-        {
-            return await _context.Roles.FirstOrDefaultAsync(r => r.Name == Name);
         }
 
         public async Task<Role> Update(Role role)
@@ -61,7 +50,7 @@ namespace BlogDALLibrary.Repositories
 
         public async Task Delete(int id)
         {
-            var _role = await GetById(id);
+            var _role = await Get(id);
             if (_role == null)
             {
                 throw new NullReferenceException($"No role found with given id := {id}");

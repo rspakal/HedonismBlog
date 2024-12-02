@@ -15,13 +15,14 @@ namespace BlogDALLibrary.Repositories
         {
             _context = context;
         }
+
         public async Task<User> Create(User user)
         {
             user.Email = user.Email.ToLower();
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            var u = Get(user.Id).Result;
-            return u;
+            var _user = await Get(user.Id);
+            return _user;
         }
 
         public async Task Delete(int id)

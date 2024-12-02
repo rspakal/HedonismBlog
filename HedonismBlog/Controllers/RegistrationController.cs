@@ -1,57 +1,39 @@
-﻿using AutoMapper;
-using BlogDALLibrary.Entities;
-using BlogDALLibrary.Repositories;
-using HedonismBlog.ViewModels;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
+using ServicesLibrary;
+using ServicesLibrary.Models.User;
 using System.Threading.Tasks;
 
 namespace HedonismBlog.Controllers
 {
     public class RegistrationController : Controller
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IRoleRepository _roleRepository;
-        private readonly IMapper _mapper;
+        private readonly IUserService  _userService;
         private readonly ILogger<RegistrationController> _logger;
 
-        public RegistrationController(IUserRepository userRepository, IRoleRepository roleRepository, IMapper mapper, ILogger<RegistrationController> logger)
+        public RegistrationController(IUserService userService, ILogger<RegistrationController> logger)
         {
-            _userRepository = userRepository;
-            _roleRepository = roleRepository;
-            _mapper = mapper;
+            _userService = userService;
             _logger = logger;
         }
 
         [HttpGet]
-        [Route("Register")]
+        [Route("register")]
         public IActionResult Register()
         {
             return View();
         }
 
         [HttpPost]
-        [Route("SubmitRegister")]
-        public async Task<IActionResult> SubmitRegister(UserViewModel viewModel)
+        [Route("register")]
+        public async Task<IActionResult> Register(UserRegistrationModel userRegistrationModel)
         {
             if (!ModelState.IsValid)
             {
-                return View(viewModel);
+                return View(userRegistrationModel);
             }
-
-            if ((await _userRepository.Get(viewModel.Email)) != null)
-            {
-                ViewBag.Message = $"The user with '{viewModel.Email}' address is already exist";
-                return View("Register");
-            }
-            var user = _mapper.Map<User>(viewModel);
-            var role = await _roleRepository.GetRolesByName("user");
-            if (role == null)
-                throw new NullReferenceException($"No role with the name \"user\" in DB");
-            user.Role = role;
-            await _userRepository.Create(user);
-            _logger.LogInformation($"User action:New user with email {viewModel.Email} registered");
+            await _userService.Register(userRegistrationModel);
+            _logger.LogInformation($"User action:New user with email {userRegistrationModel.Email} registered");
             return View("RegisterSucceed");
         }
     }

@@ -1,12 +1,11 @@
-﻿using API.APIModels.User;
-using AutoMapper;
-using BlogDALLibrary.Entities;
+﻿using AutoMapper;
 using BlogDALLibrary.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ServicesLibrary;
+using ServicesLibrary.Models.User;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -17,11 +16,13 @@ namespace API.Controllers
     [Route("api")]
     public class UserController : ControllerBase
     {
+        private readonly IUserService _userService;
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IMapper _mapper;
-        public UserController(IUserRepository userRepository, IRoleRepository roleRepository, IMapper mapper)
+        public UserController(IUserService userService, IUserRepository userRepository, IRoleRepository roleRepository, IMapper mapper)
         {
+            _userService = userService;
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _mapper = mapper;
@@ -29,80 +30,69 @@ namespace API.Controllers
 
         [HttpGet("users")]
         [Authorize(Roles = "administrator")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> Index()
         {
-            var _users = await _userRepository.GetAllAsNoTracking();
-            var _userPreviewModels = _mapper.Map<List<UserPreviewAPIModel>>(_users);
+            var _userPreviewModels = await _userService.GetAll();
             return Ok(_userPreviewModels);
         }
 
-        [HttpGet("user/account")]
+        [HttpGet("account")]
         [Authorize]
         public async Task<IActionResult> Account()
         {
             var _contextUser = HttpContext.User;
-            var _contextUserEmail = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var _user = await _userRepository.Get(_contextUserEmail);
-            var _userAccountAPIModel = _mapper.Map<UserAccountAPIModel>(_user);
-            return Ok(_userAccountAPIModel);
+            var _email = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var _userAccountModel = await _userService.GetAccountData(_email);
+            return Ok(_userAccountModel);
         }
 
-        [HttpPut("user/accountupdate")]
+        [HttpPost("account")]
         [Authorize]
-        public async Task<IActionResult> Update(UserAccountAPIModel userAccountAPIModel)
+        public async Task<IActionResult> Update(UserAccountModel userAccountModel)
         {
-            if (userAccountAPIModel == null)
+            if (userAccountModel == null)
             {
-                throw new ArgumentNullException(nameof(userAccountAPIModel), "Argument 'UserAccountAPIMode' is null");
+                throw new ArgumentNullException(nameof(userAccountModel), "Argument 'UserAccountAPIMode' is null");
+            }
+            try
+            {
+                var _currenttUser = HttpContext.User;
+                var _currentUserEmail = _currenttUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                await _userService.UpdateAccountData(userAccountModel, _currentUserEmail);
+                return Ok();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        [HttpGet("user/role")]
+        [Authorize(Roles = "administrator")]
+
+        public async Task<IActionResult> AssignRole(int userId)
+        {
+            if (userId < 1)
+            {
+                throw new ArgumentNullException(nameof(userId), "Argument id is incorrect");
             }
 
-            var _contextUser = HttpContext.User;
-            var _contextUserEmail = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            if (_contextUserEmail != userAccountAPIModel.Email)
-            {
-                return Forbid();
-            }
-
-            var _user = _mapper.Map<User>(userAccountAPIModel);
-            await _userRepository.Update(_user);
-            return Ok();
+            var _userAssignRoleModel = await _userService.AssignRole(userId); ;
+            return Ok(_userAssignRoleModel);
 
         }
 
-        [HttpGet("user/assignrole")]
+        [HttpPut("user/role")]
         [Authorize(Roles = "administrator")]
-
-        public async Task<IActionResult> AssignRole(int id)
+        public async Task<IActionResult> AssignRole(UserAssignRoleModel userAssignRoleModel)
         {
-            if (id == 0)
+            if (userAssignRoleModel == null)
             {
-                throw new ArgumentNullException(nameof(id), "Argument id is zero or null");
+                throw new ArgumentNullException(nameof(userAssignRoleModel), "Argument 'UserAssignRoleAPIMode' is null");
             }
 
-            var _user = await _userRepository.Get(id);
-            var _roles = await _roleRepository.GetAll();
-            var _userAssignRoleAPIModel = _mapper.Map<UserAssignRoleAPIModel>(_user);
-            _roles
-                .Where(key => !_userAssignRoleAPIModel.Roles.ContainsKey(key.Name))
-                .ToList()
-                .ForEach(key => _userAssignRoleAPIModel.Roles[key.Name] = false);
-            return Ok(_userAssignRoleAPIModel);
-
-        }
-
-        [HttpPut("user/assignrole")]
-        [Authorize(Roles = "administrator")]
-        public async Task<IActionResult> AssignRole(UserAssignRoleAPIModel userAssignRoleAPIModel)
-        {
-            if (userAssignRoleAPIModel == null)
-            {
-                throw new ArgumentNullException(nameof(userAssignRoleAPIModel), "Argument 'UserAssignRoleAPIMode' is null");
-            }
-
-            var _role = await _roleRepository.GetRolesByName(userAssignRoleAPIModel.Roles.FirstOrDefault(r => r.Value == true).Key ?? "user");
-            var _user = await _userRepository.Get(userAssignRoleAPIModel.Email);
-            _user.Role = _role;
-            await _userRepository.Update(_user);
+            await _userService.AssignRole(userAssignRoleModel);
             return Ok();
         }
     }

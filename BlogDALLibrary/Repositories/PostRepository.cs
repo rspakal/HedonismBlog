@@ -57,7 +57,7 @@ namespace BlogDALLibrary.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<IEnumerable> GetAll()
+        public async Task<List<Post>> GetAll()
         {
             return await _context.Posts
                 .Include(p => p.Tags)
@@ -65,7 +65,7 @@ namespace BlogDALLibrary.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable> GetAllAsNoTracking()
+        public async Task<List<Post>> GetAllAsNoTracking()
         {
             return await _context.Posts
                 .Include(p => p.Tags)

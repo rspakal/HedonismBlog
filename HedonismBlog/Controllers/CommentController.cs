@@ -1,86 +1,57 @@
-﻿using AutoMapper;
-using BlogDALLibrary.Entities;
-using BlogDALLibrary.Repositories;
-using HedonismBlog.ViewModels;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
+using ServicesLibrary;
+using ServicesLibrary.Models.Post;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HedonismBlog.Controllers
 {
-
     [Authorize]
     public class CommentController : Controller
     {
+        private readonly ICommentService _commentService;
         private readonly ILogger<HomeController> _logger;
-        private readonly IMapper _mapper;
-        private readonly IUserRepository _userRepository;
-        private readonly IPostRepository _postRepository;
-        private readonly ICommentRepository _commentRepository;
 
-        public CommentController(IUserRepository userRepository, IPostRepository postRepository, ICommentRepository commentRepository, ILogger<HomeController> logger, IMapper mapper)
+        public CommentController(ICommentService commentService, ILogger<HomeController> logger)
         {
-            _userRepository = userRepository;
-            _postRepository = postRepository;
-            _commentRepository = commentRepository;
+            _commentService = commentService;
             _logger = logger;
-            _mapper = mapper;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
         }
 
         [HttpPost]
+        [Route("comment/create")]
         public async Task<IActionResult> Create(PostViewModel postViewModel)
         {
             if (!ModelState.IsValid)
             {
-                TempData["Errors"]  = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return RedirectToAction("View", "Post", new { Id = postViewModel.Id });
+                return RedirectToAction("View", "Post", new { postViewModel.Id });
             }
-            var post = await _postRepository.Get(postViewModel.Id);
-            var userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var user = await _userRepository.Get(userEmail);
-            var comment = _mapper.Map<Comment>(postViewModel.NewComment);
-            comment.User = user;
-            comment.Post = post;
-            comment.TimeStamp = DateTime.Now.ToString();
-            await _commentRepository.Create(comment);
+            await _commentService.CreateAsync(postViewModel);
             _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' added comment");
-            return RedirectToAction("View", "Post", new { Id = postViewModel.Id });
+            return RedirectToAction("View", "Post", new { postViewModel.Id });
         }
 
-        public IActionResult Get(int id)
+        [HttpPost]
+        [Route("comment/edit")]
+        public IActionResult Edit(PostViewModel postViewModel)
         {
-            var comment = _commentRepository.Get(id);
-            return View(comment);
-        }
-
-        public IActionResult GetAll(int id)
-        {
-            var comments = _commentRepository.GetAll();
-            return View(comments);
-        }
-
-        public IActionResult Edit(Comment comment)
-        {
-            _commentRepository.Update(comment);
+            _commentService.Update(postViewModel);
             return View();
         }
 
+
+        [HttpGet]
+        [Route("comment/delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            var comment = await _commentRepository.Get(id);
-            var postId = comment.PostId;
-            await _commentRepository.Delete(id);
+            var _comment = await _commentService.GetAsNoTrackingAsync(id);
+            await _commentService.DeleteAsync(id);
+
             _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' deleted comment");
-            return RedirectToAction("View", "Post", new { Id = postId });
+            return RedirectToAction("View", "Post", new { id = _comment.PostId });
         }
 
     }

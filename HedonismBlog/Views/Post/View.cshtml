@@ -1,5 +1,5 @@
 ﻿@using System.Security.Claims
-@model HedonismBlog.ViewModels.PostViewModel
+@model ServicesLibrary.Models.Post.PostViewModel
 
 @{
     ViewData["Title"] = "ViewPost";
@@ -60,6 +60,9 @@
     }
 @if (User.Identity.IsAuthenticated)
 {
+
+    var currentUserEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
         <div class="form-group">
             <form method="post" asp-controller="Comment" asp-action="Create">
                 <div asp-validation-summary="ModelOnly"></div>
@@ -72,6 +75,7 @@
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="Title" />
                     <input type="hidden" asp-for="Content" />
+                    <input type="hidden" asp-for="NewComment.UserEmail" value="@currentUserEmail" />
                 </div>
                 <div class="form-group">
                     <input class="btn btn-outline-success" type="submit" id="submitAddComment" disabled value="Add" />

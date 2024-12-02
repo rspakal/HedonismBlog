@@ -8,9 +8,9 @@ using BlogDALLibrary.Repositories;
 using System.Collections.Generic;
 namespace API
 {
-    public class MappingProfile : Profile
+    public class MappingProfile1 : Profile
     {
-        public MappingProfile()
+        public MappingProfile1()
         {
             CreateMap<User, UserLoginAPIModel>();
             CreateMap<UserLoginAPIModel, User>();
@@ -28,8 +28,6 @@ namespace API
                 });
             CreateMap<Post, PostPreviewAPIModel>()
                 .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email));
-                //.ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags))
-                //.ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments));
             CreateMap<PostPreviewAPIModel, Post>();
             CreateMap<Role, RoleAPIModel>();
             CreateMap<RoleAPIModel, Role>();

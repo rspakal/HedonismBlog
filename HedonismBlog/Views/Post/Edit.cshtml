@@ -1,4 +1,4 @@
-﻿@model HedonismBlog.ViewModels.PostViewModel
+﻿@model ServicesLibrary.Models.Post.PostUpdateModel
 
 @{
     ViewData["Title"] = "EditPost";
@@ -8,7 +8,7 @@
 <script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
 
 <h2>Edit Post</h2>
-<form method="post" asp-controller="Post" asp-action="SubmitEdit">
+<form method="post" asp-controller="Post" asp-action="Edit">
     <div asp-validation-summary="ModelOnly"></div>
      <div>
         @for (int i = 0; i < Model.Tags.Count; i++)

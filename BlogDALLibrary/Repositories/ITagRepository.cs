@@ -7,8 +7,8 @@ namespace BlogDALLibrary.Repositories
     public interface ITagRepository
     {
         public Task<Tag> Create(Tag tag);
-        public Task<Tag> GetById(int id);
-        public Task<Tag> GetByName(string name);
+        public Task<Tag> Get(int id);
+        public Task<Tag> Get(string name);
         public Task<IEnumerable> GetAll();
         public Task<IEnumerable> GetAllAsNoTracking();
 

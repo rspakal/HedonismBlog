@@ -1,15 +1,16 @@
 ﻿using AutoMapper;
 using BlogDALLibrary.Entities;
 using HedonismBlog.ViewModels;
+using ServicesLibrary.Models;
 
 namespace HedonismBlog
 {
-    public class MappingProfile : Profile
+    public class MappingProfile1 : Profile
     {
-        public MappingProfile()
+        public MappingProfile1()
         {
-            CreateMap<User, UserViewModel>();
-            CreateMap<UserViewModel, User>();
+            //CreateMap<User, UserViewModel>();
+            //CreateMap<UserViewModel, User>();
             CreateMap<Post, PostViewModel>()
                 .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags))
@@ -17,8 +18,8 @@ namespace HedonismBlog
             CreateMap<PostViewModel, Post>();
             CreateMap<Comment, CommentViewModel>();
             CreateMap<CommentViewModel, Comment>();
-            CreateMap<TagViewModel, Tag>();
-            CreateMap<Tag, TagViewModel>();
+            CreateMap<TagModel, Tag>();
+            CreateMap<Tag, TagModel>();
             CreateMap<RoleViewModel, Role>();
             CreateMap<Role, RoleViewModel>();
         }

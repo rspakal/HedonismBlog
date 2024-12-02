@@ -1,4 +1,4 @@
-﻿@model HedonismBlog.ViewModels.UserViewModel
+﻿@model ServicesLibrary.Models.User.UserAssignRoleModel
 
 @{
     ViewData["Title"] = "AssignUserRole";
@@ -14,16 +14,18 @@
 <div>
     <h6>@ViewBag.Message</h6>
 </div>
-<form method="post" asp-controller="User" asp-action="SubmitAssignRole">
+<form method="post" asp-controller="User" asp-action="AssignRole">
     <div asp-validation-summary="ModelOnly"></div>
      <div>
         @foreach (var role in Model.Roles)
         {
-            <input type="radio" asp-for="RoleName" value="@role.Name" /> @role.Name <br />
+            <input type="radio" asp-for="SelectedRole" value="@role"/> @role <br />
         }
     </div>
     <div>
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Email" />
+
     </div>
     <div class="form-group">
         <input class="btn btn-outline-success" type="submit" value="Assign" />

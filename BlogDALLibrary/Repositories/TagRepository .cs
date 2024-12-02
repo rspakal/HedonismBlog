@@ -76,5 +76,15 @@ namespace BlogDALLibrary.Repositories
                 throw;
             }
         }
+
+        public async Task<Tag> Get(int id)
+        {
+            return await _context.FindAsync<Tag>(id);
+        }
+
+        public async Task<Tag> Get(string text)
+        {
+            return await _context.Tags.FirstOrDefaultAsync(t => t.Text == text);
+        }
     }
 }

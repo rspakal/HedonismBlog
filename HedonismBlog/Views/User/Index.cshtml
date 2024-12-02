@@ -1,4 +1,4 @@
-﻿@model List<HedonismBlog.ViewModels.UserViewModel>
+﻿@model List<ServicesLibrary.Models.User.UserPreviewModel>
 
 @{
     ViewData["Title"] = "AllUsers";
@@ -15,9 +15,9 @@
             <div class="card">
                 @* <img class="card-img-top" src="@card.ImageUrl" alt="Card image cap"> *@
                 <div class="card-body">
-                    <h6 class="card-title"><a href="@Url.Action("AssignRole", "User", new { id = user.Id })">@user.Email</a></h6>
+                    <h6 class="card-title"><a href="@Url.Action("AssignRole", "User", new { userId = user.Id })">@user.Email</a></h6>
                     <div>
-                        <span class="badge rounded-pill">@user.RoleName</span>
+                        <span class="badge rounded-pill">@user.Role.Name</span>
                     </div>
                 </div>
             </div>

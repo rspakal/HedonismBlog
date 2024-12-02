@@ -5,6 +5,8 @@ using BlogDALLibrary.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
+using ServicesLibrary;
+using ServicesLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,22 +18,20 @@ namespace API.Controllers
     [Authorize(Roles = "administrator")]
     public class RoleController : ControllerBase
     {
-        private readonly IRoleRepository _roleRepository;
-        private readonly IMapper _mapper;
-        public RoleController(IRoleRepository roleRepository, IMapper mapper)
+        private readonly IRoleService _roleService;                  
+
+        public RoleController(IRoleService roleService)
         {
-            _roleRepository = roleRepository;
-            _mapper = mapper;
+            _roleService = roleService;
         }
 
         [HttpGet("roles")]
-        public async Task<IActionResult> Roles()
+        public async Task<IActionResult> Index()
         {
             try
             {
-                var _roles = await _roleRepository.GetAll();
-                var _roleAPIModels = _mapper.Map<List<RoleAPIModel>>(_roles);
-                return Ok(_roleAPIModels);
+                var _roleModels = await _roleService.GetAllAsync();
+                return Ok(_roleModels);
             }
             catch (Exception ex)
             {
@@ -40,14 +40,12 @@ namespace API.Controllers
         }
 
         [HttpPost("role/create")]
-        public async Task<IActionResult> Create(RoleAPIModel roleAPIModel)
+        public async Task<IActionResult> Create(RoleModel roleModel)
         {
-            var _role = _mapper.Map<Role>(roleAPIModel);
             try
             {
-                await _roleRepository.Create(_role);
+                await _roleService.CreateAsync(roleModel);
                 return Ok();
-
             }
             catch (Exception ex)
             {
@@ -55,25 +53,12 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("role/view")]
-        public async Task<IActionResult> View(int id)
+        [HttpPut("role/edit")]
+        public async Task<IActionResult> Edit(RoleModel roleModel)
         {
-            var _role = await _roleRepository.GetById(id);
-            if (_role == null)
-            {
-                return StatusCode(500, $"Server internal error: No role found with given id := {id}");
-            }
-            var _roleAPIModel = _mapper.Map<RoleAPIModel>(_role);
-            return Ok(_roleAPIModel);
-        }
-
-        [HttpPut("role/update")]
-        public async Task<IActionResult> Update(RoleAPIModel roleAPIModel)
-        {
-            var _role = _mapper.Map<Role>(roleAPIModel);
             try
             {
-                await _roleRepository.Update(_role);
+                await _roleService.Update(roleModel);
                 return Ok();
             }
             catch (Exception ex)
@@ -88,7 +73,7 @@ namespace API.Controllers
         {
             try
             {
-                await _roleRepository.Delete(id);
+                await _roleService.DeleteAsync(id);
                 return Ok();
             }
             catch (Exception ex)

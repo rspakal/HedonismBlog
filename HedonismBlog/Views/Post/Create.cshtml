@@ -1,4 +1,5 @@
-﻿@model HedonismBlog.ViewModels.PostViewModel
+﻿@using System.Security.Claims
+@model ServicesLibrary.Models.Post.PostCreateModel
 
 @{
     ViewData["Title"] = "CreatePost";
@@ -8,9 +9,13 @@
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 
+@{
+    var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+}
+
 <h2>Create new Post</h2>
 <div class="container">
-<form method="post" asp-controller="Post" asp-action="SubmitCreate">
+<form method="post" asp-controller="Post" asp-action="Create">
     <div asp-validation-summary="ModelOnly"></div>
      <div class="form-group">
         @for (int i = 0; i < Model.Tags.Count; i++)
@@ -35,7 +40,7 @@
         <span asp-validation-for="Content"></span>
     </div>
     <div>
-        <input type="hidden" asp-for="UserEmail" />
+        <input type="hidden" asp-for="UserEmail" value="@userEmail" />
     </div>
 
         <div class="form-group">

@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
-using BlogDALLibrary.Entities;
 using BlogDALLibrary.Repositories;
-using HedonismBlog.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+using ServicesLibrary;
+using ServicesLibrary.Models;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -17,24 +16,28 @@ namespace HedonismBlog.Controllers
     {
         private readonly ITagRepository _tagRepository;
         private readonly IMapper _mapper;
+        private readonly ITagService _tagService;
         private readonly ILogger<HomeController> _logger;
 
 
-        public TagController(ITagRepository tagRepository, ILogger<HomeController> logger, IMapper mapper)
+        public TagController(ITagService tagService, ITagRepository tagRepository, ILogger<HomeController> logger, IMapper mapper)
         {
             _tagRepository = tagRepository;
             _logger = logger;
+            _tagService = tagService;
             _mapper = mapper;
         }
 
+        [HttpGet]
+        [Route("tags")]
         public async Task<IActionResult> Index()
         {
-            var tags = await _tagRepository.GetAll();
-            var tagViewModels = _mapper.Map<List<TagViewModel>>(tags);
-            return View(tagViewModels);
+            var _tagModels = await _tagService.GetAllAsync();
+            return View(_tagModels);
         }
 
         [HttpGet]
+        [Route("tag/create")]
         public IActionResult Create() 
         {
             return View();
@@ -42,61 +45,46 @@ namespace HedonismBlog.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> SubmitCreate(TagViewModel viewModel)
+        [Route("tag/create")]
+        public async Task<IActionResult> Create(TagModel tagModel)
         {
             if (!ModelState.IsValid) 
             {
                 return View("Create");
             }
 
-            if ((await _tagRepository.GetByName(viewModel.Text) != null))
-            {
-                ViewBag.Message = $"The tag '{viewModel.Text.ToLower()}' is already exist";
-                return View("Create");
-            }
-
-            var tag = _mapper.Map<Tag>(viewModel);
-            await _tagRepository.Create(tag);
-            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' created '{viewModel.Text}' tag'");
+            await _tagService.CreateAsync(tagModel);
+            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' created '{tagModel.Text}' tag'");
             return RedirectToAction("Index", "Tag");
         }
 
         [HttpGet]
-        public IActionResult Get(int id)
+        [Route("tag/edit")]
+        public async Task<IActionResult> Edit([FromQuery] int id)
         {
-            var tag = _tagRepository.GetById(id);
-            return View(tag);
-        }
-        public IActionResult GetAll()
-        {
-            var tags = _tagRepository.GetAll();
-            return View(tags);
+            var _tagModel = await _tagService.GetAsync(id);
+            return View(_tagModel);
         }
 
-        public async Task<IActionResult> Edit(int id)
-        {
-            var tag = await _tagRepository.GetById(id);
-            var tagViewModel = _mapper.Map<TagViewModel>(tag);
-            return View(tagViewModel);
-        }
-
-        public async Task<IActionResult> SubmitEdit(TagViewModel tagViewModel) 
+        [HttpPost]
+        [Route("tag/edit")]
+        public async Task<IActionResult> Edit(TagModel tagModel) 
         {
             if (!ModelState.IsValid)
             {
                 return View("Edit");
             }
-            var tag = _mapper.Map<Tag>(tagViewModel);
-            await _tagRepository.Update(tag);
-            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' edited '{tagViewModel.Text}' tag'");
+
+            await _tagService.Update(tagModel);
+            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' edited '{tagModel.Text}' tag'");
             return RedirectToAction("Index", "Tag");
         }
 
+
         public async Task<IActionResult> Delete(int id)
         {
-            var _tag = await _tagRepository.GetById(id);
-            await _tagRepository.Delete(id);
-            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' deleted '{_tag.Text}' tag'");
+            await _tagService.DeleteAsync(id);
+            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' deleted '{id}' tag'");
             return RedirectToAction("Index", "Tag");
         }
 

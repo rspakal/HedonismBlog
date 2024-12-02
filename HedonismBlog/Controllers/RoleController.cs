@@ -1,11 +1,8 @@
-﻿using AutoMapper;
-using BlogDALLibrary.Entities;
-using BlogDALLibrary.Repositories;
-using HedonismBlog.ViewModels;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+using ServicesLibrary;
+using ServicesLibrary.Models;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -15,91 +12,70 @@ namespace HedonismBlog.Controllers
     [Authorize(Roles = "administrator")]
     public class RoleController : Controller
     {
+        private readonly IRoleService _roleService;
         private readonly ILogger<HomeController> _logger;
-        private readonly IRoleRepository _roleRepository;
-        private readonly IMapper _mapper;
 
-        public RoleController(IRoleRepository roleRepository, ILogger<HomeController> logger, IMapper mapper)
+        public RoleController(IRoleService roleService, ILogger<HomeController> logger)
         {
-            _roleRepository = roleRepository;
+            _roleService = roleService;
             _logger = logger;
-            _mapper = mapper;
         }
 
         [HttpGet]
+        [Route("roles")]
         public async Task<IActionResult> Index()
         {
-            var roles = await _roleRepository.GetAll();
-            var roleViewModels = _mapper.Map<List<RoleViewModel>>(roles);
-            return View(roleViewModels);
+            var _roleViewModels = await _roleService.GetAllAsync();
+            return View(_roleViewModels);
         }
 
         [HttpGet]
+        [Route("role/create")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitCreate(RoleViewModel roleViewModel)
+        [Route("role/create")]
+        public async Task<IActionResult> Create(RoleModel roleModel)
         {
             if (!ModelState.IsValid)
             {
                 return View("Create");
             }
-            roleViewModel.Name = roleViewModel.Name.ToLower();
-            if ((await _roleRepository.GetByName(roleViewModel.Name)) != null)
-            {
-                ViewBag.Message = $"The role '{roleViewModel.Name}' is already exist";
-                return View("Create");
-            }
-            var role = _mapper.Map<Role>(roleViewModel);
-            await _roleRepository.Create(role);
-            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' created '{roleViewModel.Name}' role'");
+            await _roleService.CreateAsync(roleModel);
+            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' created '{roleModel.Name}' role'");
             return RedirectToAction("Index", "Role");
         }
 
-        public async Task<IActionResult> Edit(int id)
+        [HttpGet]
+        [Route("role/edit")]
+        public async Task<IActionResult> Edit([FromQuery]int id)
         {
-            var role = await _roleRepository.GetById(id);
-            var roleViewModel = _mapper.Map<RoleViewModel>(role);
-            return View(roleViewModel);
+            var _roleModel = await _roleService.GetAsync(id);
+            return View(_roleModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitEdit(RoleViewModel roleViewModel)
+        [Route("role/edit")]
+        public async Task<IActionResult> Edit(RoleModel roleModel)
         {
-            var role = await _roleRepository.GetByName(roleViewModel.Name);
-            if (role != null && role.Id != roleViewModel.Id)
+            if (!ModelState.IsValid)
             {
-                ViewBag.Message = $"The role '{roleViewModel.Name}' is already exist";
-                return View("Edit", new { Id = roleViewModel.Id });
+                return View("Edit");
             }
-            var updatedRole = _mapper.Map<Role>(roleViewModel);
-            await _roleRepository.Update(updatedRole);
-            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' updated '{roleViewModel.Name}' role'");
-            return RedirectToAction("Index", "Role");
+            await _roleService.Update(roleModel);
+            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' updated '{roleModel.Name}' role'");
+            return RedirectToAction("Edit", "Role", new { roleModel.Id });
         }
 
         [HttpGet]
-        public IActionResult GetAll() 
+        [Route("role/delete")]
+        public async Task<IActionResult> Delete([FromQuery]int id) 
         {
-            return View();
-        }
-
-        [HttpGet]
-        public IActionResult Get(int id)
-        {
-            var role = _roleRepository.GetById(id);
-            return View(role);
-        }
-
-        public async Task<IActionResult> Delete(int id) 
-        {
-            var _role = await _roleRepository.GetById(id);
-            await _roleRepository.Delete(_role);
-            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' deleted '{_role.Name}' role'");
-
+            await _roleService.DeleteAsync(id);
+            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' deleted '{id}' role'");
             return RedirectToAction("Index", "Role");
         }
 

@@ -1,9 +1,8 @@
-﻿using API.APIModels.User;
-using AutoMapper;
-using BlogDALLibrary.Entities;
-using BlogDALLibrary.Repositories;
+﻿using BlogDALLibrary.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using ServicesLibrary;
+using ServicesLibrary.Models.User;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,19 +15,25 @@ namespace API.Controllers
     [Route("api")]
     public class AuthenticationController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper  _mapper;
-        public AuthenticationController(IUserRepository userRepository, IMapper mapper)
+        private readonly IUserService _userService;
+
+        public AuthenticationController(IUserService userService)
         {
-            _userRepository = userRepository;
-            _mapper = mapper;
+            _userService = userService;
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginModel userLoginModel)
+        {
+            var _user = await _userService.Login(userLoginModel);
+            return Ok(new { token = CreateToken(_user) });
         }
 
         private string CreateToken(User user)
         {
             if (user == null)
             {
-                throw new ArgumentNullException(nameof(user), "Argument 'User' is null");
+                throw new ArgumentNullException(nameof(user), "Argument 'UserLoginModel' is null");
             }
             var claims = new[]
             {
@@ -47,17 +52,6 @@ namespace API.Controllers
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginAPIModel userLoginAPIModel)
-        {
-            var _user = await _userRepository.Get(userLoginAPIModel.Email);
-            if (_user == null || _user.Password != userLoginAPIModel.Password) 
-            {
-                return Unauthorized(new { message = "Wrong email or password." });
-            }
-            return Ok(new { token = CreateToken(_user) });
         }
 
     }

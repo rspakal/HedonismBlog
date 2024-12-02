@@ -10,5 +10,6 @@ namespace ServicesLibrary.Models
         [StringLength(10, ErrorMessage = "Tag name must be between 3 and 10 characters long.", MinimumLength = 3)]
         //[LatinCharactersOnly(ErrorMessage = "Only latin symbols allowed")]
         public string Text { get; set; }
+        public bool IsSelected { get; set; }
     }
 }

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using BlogDALLibrary.Repositories;
 using BlogDALLibrary;
+using ServicesLibrary;
 
 namespace HedonismBlog
 {
@@ -37,20 +38,6 @@ namespace HedonismBlog
             services.AddSingleton(mapper);
             services.AddControllersWithViews();
             services.AddDbContext<HedonismBlogContext>();
-
-            //services.AddIdentityCore<User>()
-            //    .AddRoles<Role>()
-            //    .AddEntityFrameworkStores<HedonismBlogContext>();
-            //services.AddIdentity<User, IdentityRole>(options =>
-            //{
-            //    options.Password.RequiredLength = 5;
-            //    options.Password.RequireNonAlphanumeric = false;
-            //    options.Password.RequireLowercase = false;
-            //    options.Password.RequireUppercase = false;
-            //    options.Password.RequireDigit = false;
-            //})
-            //    .AddEntityFrameworkStores<HedonismBlogContext>();
-
             services.AddAuthentication(options => options.DefaultScheme = "Cookies")
                 .AddCookie("Cookies", options =>
                 {
@@ -62,7 +49,6 @@ namespace HedonismBlog
                             return Task.CompletedTask;
                         }
                     };
-                    //options.LoginPath = "/Account/Signin";
                     options.AccessDeniedPath = "/AccessDenied";
                 });
             services.AddScoped<IUserRepository, UserRepository>();
@@ -70,30 +56,21 @@ namespace HedonismBlog
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPostService, PostService>();
+            services.AddScoped<ITagService, TagService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<ICommentService, CommentService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            app.Use(async (httpContext, next) =>
-            {
-                var logger = NLog.LogManager.GetCurrentClassLogger();
-                try
-                {
-                    logger.Info($"{httpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? "Guest"} requested URL: {httpContext.Request.Path}");
-                    await next.Invoke();
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex, "An error occurred: {Message}", ex.Message);
-                    throw;
-                }
-            });
 
             if (env.IsDevelopment())
             {
-                //app.UseDeveloperExceptionPage();
-                app.UseExceptionHandler("/Home/Error500");
+                app.UseDeveloperExceptionPage();
+                //app.UseExceptionHandler("/Home/Error500");
             }
             else
             {
