@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BlogDALLibrary.Entities;
 using BlogDALLibrary.Repositories;
+using Microsoft.AspNetCore.Http;
 using ServicesLibrary.Models;
 using ServicesLibrary.Models.Post;
 using ServicesLibrary.Models.User;
@@ -49,8 +50,15 @@ namespace ServicesLibrary
             await _postRepository.Create(_post);
         }
 
-        public async Task DeleteAsync(int postId)
+        public async Task DeleteAsync(int postId, string currentUserEmail, string currentUserRole)
         {
+            var _post = await _postRepository.GetAsNoTracking(postId);
+
+            if (_post.User.Email != currentUserEmail && currentUserRole != "administrator" && currentUserRole != "moderator")
+            {
+                return;
+            }
+
             await _postRepository.Delete(postId);
         }
 
@@ -68,11 +76,17 @@ namespace ServicesLibrary
             return _postViewModel;
         }
 
-        public async Task<PostUpdateModel> Update(int postId)
+        public async Task<PostUpdateModel> Update(int postId, string currentUserEmail, string currentUserRole)
         {
+            var _post = await _postRepository.GetAsNoTracking(postId);
+
+            if (_post.User.Email != currentUserEmail && currentUserRole != "administrator" && currentUserRole != "moderator")
+            {
+                return null;
+            }
+
             var _tags = await _tagRepository.GetAllAsNoTracking();
             var _tagModels = _mapper.Map<List<TagModel>>(_tags);
-            var _post = await _postRepository.GetAsNoTracking(postId);
             var _postUpdateModel = _mapper.Map<PostUpdateModel>(_post);
             foreach (var tag in _tagModels)
             {
@@ -85,9 +99,15 @@ namespace ServicesLibrary
             return _postUpdateModel;
         }
 
-        public async Task Update(PostUpdateModel postUpdateModel)
+        public async Task Update(PostUpdateModel postUpdateModel, string currentUserEmail, string currentUserRole)
         {
             var _user = await _userRepository.Get(postUpdateModel.UserEmail);
+
+            if (_user.Email != currentUserEmail && currentUserRole != "administrator" && currentUserRole != "moderator")
+            {
+                return;
+            }
+
             postUpdateModel.Tags = postUpdateModel.Tags.Where(t => t.IsSelected == true).ToList();
             var _post = _mapper.Map<Post>(postUpdateModel);
             _post.User = _user;

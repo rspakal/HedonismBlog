@@ -1,92 +1,86 @@
-﻿using API.APIModels.Comment;
-using AutoMapper;
-using BlogDALLibrary.Entities;
-using BlogDALLibrary.Repositories;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
+using ServicesLibrary;
+using ServicesLibrary.Models.Post;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace API.Controllers
 {
-    [Route("api")]
-    [ApiController]
-    public class CommentController : ControllerBase
+    public class CommentController : BlogAPIBaseController
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IPostRepository _postRepository;
-        private ICommentRepository _commentRepository;
-        private IMapper _mapper;
-        public CommentController(IUserRepository userRepository, IPostRepository postRepository, ICommentRepository commentRepository, IMapper mapper)
-        {
-            _userRepository = userRepository;
-            _postRepository = postRepository;
-            _commentRepository = commentRepository;
-            _mapper = mapper;
+        private readonly ICommentService _commentService;
 
+        public CommentController(ICommentService commentService)
+        {
+            _commentService = commentService;
         }
 
+        /// <summary>
+        /// Adds a new comment to a post.
+        /// </summary>
+        /// <param name="postViewModel">Model for post view.</param>
+        /// <returns>Adding new comment result .</returns>
+        /// <response code="200">New comment was added.</response>
+        /// <response code="400">If PostViewModel is null.</response>
         [HttpPost("comment/create")]
         [Authorize]
-        public async Task<IActionResult> Create([FromBody] CommentAPIModel commentAPIModel)
+        public async Task<IActionResult> Create([FromBody] PostViewModel postViewModel)
         {
 
-            if (commentAPIModel == null)
+            if (postViewModel == null)
             {
-                throw new ArgumentNullException(nameof(commentAPIModel), "Argument 'CommentAPIModel' is null");
+                return BadRequest("PostViewModel cannot be null.");
             }
-            var _comment = _mapper.Map<Comment>(commentAPIModel);
-            _comment.User = await _userRepository.Get(commentAPIModel.UserEmail);
-            _comment.Post = await _postRepository.Get(commentAPIModel.PostId);
-            await _commentRepository.Create(_comment);
+
+            await _commentService.CreateAsync(postViewModel);
             return Ok();
         }
 
+        /// <summary>
+        /// Edits an existing comment. Allowed to comment author, administartor and moderator
+        /// </summary>
+        /// <param name="postViewModel">Model for post view.</param>
+        /// <returns>Editing comment result .</returns>
+        /// <response code="200">Comment was edited.</response>
+        /// <response code="400">If PostViewModel is null.</response>
         [HttpPut("comment/edit")]
         [Authorize]
-        public async Task<IActionResult> Edit([FromBody] CommentAPIModel commentAPIModel)
+        public async Task<IActionResult> Edit([FromBody] PostViewModel postViewModel)
         {
-
-            if (commentAPIModel == null)
+            if (postViewModel == null)
             {
-                throw new ArgumentNullException(nameof(commentAPIModel), "Argument 'CommentAPIModel' is null");
+                return BadRequest("PostViewModel cannot be null.");
             }
 
-            var _contextUser = HttpContext.User;
-            var _contextUserEmail = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var _contextUserRole = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-            if (_contextUserEmail != commentAPIModel.UserEmail)
-            {
-                return Forbid();
-            }
+            var _currentUserEmail = GetClaimValue(ClaimTypes.Email);
+            var _currentUserRole = GetClaimValue(ClaimTypes.Role);
 
-            var _comment = _mapper.Map<Comment>(commentAPIModel);
-            _comment.User = await _userRepository.Get(commentAPIModel.UserEmail);
-            _comment.Post = await _postRepository.Get(commentAPIModel.PostId);
-            await _commentRepository.Update(_comment);
+            await _commentService.Update(postViewModel, _currentUserEmail, _currentUserRole);
             return Ok();
         }
 
+        /// <summary>
+        /// Delets a comment. Allowed to comment author, administartor and moderator
+        /// </summary>
+        /// <param name="id">Comment id.</param>
+        /// <returns>Deleting comment result .</returns>
+        /// <response code="200">Comment was deleted.</response>
+        /// <response code="400">If Id has incorrect value.</response>
         [HttpDelete("comment/delete")]
         [Authorize]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete([FromQuery] int id)
         {
 
-            if (id == 0)
+            if (id < 1)
             {
-                throw new ArgumentNullException(nameof(id), "Argument 'id' is zero or null");
+                return BadRequest("Id cannot be less then 1.");
             }
-            var _comment = await _commentRepository.Get(id);
-            var _contextUser = HttpContext.User;
-            var _contextUserEmail = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var _contextUserRole = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-            if (_contextUserEmail != _comment.User.Email && _contextUserRole != "administrator" && _contextUserRole == "moderator")
-            {
-                return Forbid();
-            }
-            _commentRepository.Delete(_comment);
+
+            var _currentUserEmail = GetClaimValue(ClaimTypes.Email);
+            var _currentUserRole = GetClaimValue(ClaimTypes.Role);
+
+            await _commentService.DeleteAsync(id, _currentUserEmail, _currentUserRole);
             return Ok();
         }
     }

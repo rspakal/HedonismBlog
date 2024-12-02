@@ -1,14 +1,8 @@
-﻿using API.APIModels;
-using AutoMapper;
-using BlogDALLibrary.Entities;
-using BlogDALLibrary.Repositories;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using ServicesLibrary;
 using ServicesLibrary.Models;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace API.Controllers
@@ -25,61 +19,71 @@ namespace API.Controllers
             _roleService = roleService;
         }
 
+        /// <summary>
+        /// Shows all roles
+        /// </summary>
+        /// <returns>All roles.</returns>
+        /// <response code="200">All roles.</response>
         [HttpGet("roles")]
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var _roleModels = await _roleService.GetAllAsync();
-                return Ok(_roleModels);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server internal error: {ex.Message}");
-            }
+            var _roleModels = await _roleService.GetAllAsync();
+            return Ok(_roleModels);
         }
 
+        /// <summary>
+        /// Creates a new role.
+        /// </summary>
+        /// <param name="roleModel">Role model.</param>
+        /// <returns>Creatinging role result .</returns>
+        /// <response code="200">Role was created.</response>
+        /// <response code="400">If roleModel is null.</response>
         [HttpPost("role/create")]
         public async Task<IActionResult> Create(RoleModel roleModel)
         {
-            try
+            if (roleModel == null) 
             {
-                await _roleService.CreateAsync(roleModel);
-                return Ok();
+                return BadRequest("RoleMode cannot be null");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server internal error: {ex.Message}");
-            }
+
+            await _roleService.CreateAsync(roleModel);
+            return Ok();
         }
 
+        /// <summary>
+        /// Edits an existing role.
+        /// </summary>
+        /// <param name="roleModel">Role model.</param>
+        /// <returns>Editing role result .</returns>
+        /// <response code="200">Role was edited.</response>
+        /// <response code="400">If roleModel is null.</response>
         [HttpPut("role/edit")]
         public async Task<IActionResult> Edit(RoleModel roleModel)
         {
-            try
+            if (roleModel == null)
             {
-                await _roleService.Update(roleModel);
-                return Ok();
+                return BadRequest("RoleModel cannot be null.");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server internal error: {ex.Message}");
-
-            }
+            await _roleService.Update(roleModel);
+            return Ok();
         }
 
+        /// <summary>
+        /// Delets an existing role.
+        /// </summary>
+        /// <param name="id">Role id.</param>
+        /// <returns>Deleting role result .</returns>
+        /// <response code="200">Role was deleted.</response>
+        /// <response code="400">If id has incorrect value.</response>
         [HttpDelete("role/delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            if (id < 1)
             {
-                await _roleService.DeleteAsync(id);
-                return Ok();
+                return BadRequest("Id cannot be less then 1");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server internal error: {ex.Message}");
-            }
+            await _roleService.DeleteAsync(id);
+            return Ok();
         }
     }
 }

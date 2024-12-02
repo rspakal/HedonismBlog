@@ -1,75 +1,89 @@
-﻿using API.APIModels;
-using AutoMapper;
-using BlogDALLibrary.Entities;
-using BlogDALLibrary.Repositories;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ServicesLibrary;
+using ServicesLibrary.Models;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace API.Controllers
 {
-    [Route("api")]
-    [ApiController]
     [Authorize(Roles = "administrator")]
-    public class TagController : ControllerBase
+    public class TagController : BlogAPIBaseController
     {
-        private readonly ITagRepository _tagRepository;
-        private readonly IMapper _mapper;
-        public TagController(ITagRepository tagRepository, IMapper mapper)
+        private readonly ITagService _tagService;
+
+        public TagController(ITagService tagService)
         {
-            _tagRepository = tagRepository;
-            _mapper = mapper;
+            _tagService = tagService;
         }
 
+        /// <summary>
+        /// Shows all tags.
+        /// </summary>
+        /// <returns>All existing tags .</returns>
+        /// <response code="200">All existing tags.</response>
         [HttpGet("tags")]
-        public async Task<IActionResult> Tags()
+        public async Task<IActionResult> Index()
         {
-            try
-            {
-                var _tags = await _tagRepository.GetAll();
-                var _tagAPIModels = _mapper.Map<List<TagAPIModel>>(_tags);
-                return Ok(_tagAPIModels);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server internal error: {ex.Message}");
-            }
+            var _tagModels = await _tagService.GetAllAsync();
+            return Ok(_tagModels);
         }
 
+        /// <summary>
+        /// Creates a tag.
+        /// </summary>
+        /// <param name="tagModel">Model for tag.</param>
+        /// <returns>Creating tag result .</returns>
+        /// <response code="200">Tag was created.</response>
+        /// <response code="400">If tagModel is null.</response>
         [HttpPost("tag/create")]
-        public async Task<IActionResult> Create(TagAPIModel tagAPIModel)
+        public async Task<IActionResult> Create([FromBody] TagModel tagModel)
         {
-            var _tag = _mapper.Map<Tag>(tagAPIModel);
-            try
+            if (tagModel == null)
             {
-                await _tagRepository.Create(_tag);
-                return Ok();
-
+                return BadRequest("TagModel cannot be null.");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server internal error: {ex.Message}");
-            }
-        }
 
-        [HttpPut("tag/update")]
-        public async Task<IActionResult> Update(TagAPIModel tagAPIModel)
-        {
-            var _tag = _mapper.Map<Tag>(tagAPIModel);
-
-            await _tagRepository.Update(_tag);
+            await _tagService.CreateAsync(tagModel);
             return Ok();
-
         }
 
+        /// <summary>
+        /// Edits an existing tag.
+        /// </summary>
+        /// <param name="tagModel">Model for tag.</param>
+        /// <returns>Editing tag result .</returns>
+        /// <response code="200">Tag was edited.</response>
+        /// <response code="400">If tagModel is null.</response>
+        [HttpPut("tag/edit")]
+        public async Task<IActionResult> Edit([FromBody] TagModel tagModel)
+        {
+            if (tagModel == null)
+            {
+                return BadRequest("TagModel cannot be null.");
+            }
+
+            await _tagService.Update(tagModel);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Delets an existing tag.
+        /// </summary>
+        /// <param name="id">Tag id.</param>
+        /// <returns>Deleting tag result .</returns>
+        /// <response code="200">Tag was deleted.</response>
+        /// <response code="400">If id has incorrect value.</response>
         [HttpDelete("tag/delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _tagRepository.Delete(id);
-            return Ok();
+            if (id < 1)
+            {
+                return BadRequest("Id cannot be less then 1.");
+            }
 
+            await _tagService.DeleteAsync(id);
+            return Ok();
         }
     }
 }

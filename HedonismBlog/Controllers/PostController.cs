@@ -65,7 +65,10 @@ namespace HedonismBlog.Controllers
         [Route("post/edit")]
         public async Task<IActionResult> Edit([FromQuery] int id)
         {
-            var _postCreateModel = await _postService.Update(id); 
+            var _contextUserEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var _contextUserRole = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            var _postCreateModel = await _postService.Update(id, _contextUserEmail, _contextUserRole); 
             return View(_postCreateModel);
         }
 
@@ -74,11 +77,15 @@ namespace HedonismBlog.Controllers
         [Route("post/edit")]
         public async Task<IActionResult> Edit(PostUpdateModel postUpdateModel)
         {
+            var _contextUserEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var _contextUserRole = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
             if (!ModelState.IsValid)
             {
                 return View("Edit", postUpdateModel);
             }
-            await _postService.Update(postUpdateModel);
+
+            await _postService.Update(postUpdateModel, _contextUserEmail, _contextUserRole);
             _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' edited post '{postUpdateModel.Title}'");
             return RedirectToAction("Index", "Post");
         }
@@ -89,7 +96,10 @@ namespace HedonismBlog.Controllers
 
         public async Task<IActionResult> Delete([FromQuery] int id)
         {
-            await _postService.DeleteAsync(id);
+            var _contextUserEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var _contextUserRole = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            await _postService.DeleteAsync(id, _contextUserEmail, _contextUserRole);
             _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' deleted post '{id}'");
             return RedirectToAction("Index", "Post");
         }

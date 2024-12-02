@@ -12,9 +12,9 @@ namespace ServicesLibrary
     public interface ICommentService
     {
         public Task CreateAsync(PostViewModel postViewModel);
-        public Task DeleteAsync(int Id);
+        public Task DeleteAsync(int Id, string currentUserEmail, string currentUserRole);
         public Task<Comment> GetAsNoTrackingAsync(int Id);
-        public Task Update(PostViewModel postViewModel);
+        public Task Update(PostViewModel postViewModel, string currentUserEmail, string currentUserRole);
 
 
     }

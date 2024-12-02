@@ -12,11 +12,11 @@ namespace ServicesLibrary
     {
         public Task<PostCreateModel> CreateAsync();
         public Task CreateAsync(PostCreateModel postCreateModel);
-        public Task DeleteAsync(int postId);
+        public Task DeleteAsync(int postId, string currentUserEmail, string currentUserRole);
         public Task<PostViewModel>GetAsync(int postId);
         public Task<List<PostPreviewModel>> GetAllAsync();
-        public Task<PostUpdateModel> Update(int postId);
-        public Task Update(PostUpdateModel postUpdateModel);
+        public Task<PostUpdateModel> Update(int postId, string currentUserEmail, string currentUserRole);
+        public Task Update(PostUpdateModel postUpdateModel, string currentUserEmail, string currentUserRole);
 
 
     }

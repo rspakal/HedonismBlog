@@ -40,8 +40,14 @@ namespace ServicesLibrary
             await _commentRepository.Create(_comment);
         }
 
-        public async Task DeleteAsync(int commentId)
+        public async Task DeleteAsync(int commentId, string currentUserEmail, string currentUserRole)
         {
+            var _comment = await _commentRepository.Get(commentId);
+            if (_comment.User.Email != currentUserEmail && currentUserEmail != "administrator" && currentUserRole != "moderator")
+            {
+                return;
+            }
+
             await _commentRepository.Delete(commentId);
         }
 
@@ -49,8 +55,13 @@ namespace ServicesLibrary
         {
             return await _commentRepository.GetAsNoTracking(id);
         }
-        public async Task Update(PostViewModel postViewModel)
+        public async Task Update(PostViewModel postViewModel, string currentUserEmail, string currentUserRole)
         {
+
+            if (postViewModel.UserEmail != currentUserEmail && currentUserEmail != "administrator" && currentUserRole != "moderator")
+            {
+                return;
+            }
             var _comment = _mapper.Map<Comment>(postViewModel.NewComment);
             await _commentRepository.Update(_comment);
         }

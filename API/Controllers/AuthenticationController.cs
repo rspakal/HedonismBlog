@@ -22,9 +22,20 @@ namespace API.Controllers
             _userService = userService;
         }
 
+        /// <summary>
+        /// User authentication.
+        /// </summary>
+        /// <param name="userLoginModel">Model for user login.</param>
+        /// <returns>JWT token for loggedin user.</returns>
+        /// <response code="200">Returns JWT token for loggedin user.</response>
+        /// <response code="400">If UserLoginModel is null.</response>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginModel userLoginModel)
         {
+            if (userLoginModel == null) 
+            {
+                return BadRequest("UserLoginModel cannot be null");
+            }
             var _user = await _userService.Login(userLoginModel);
             return Ok(new { token = CreateToken(_user) });
         }

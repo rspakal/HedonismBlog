@@ -1,12 +1,9 @@
-﻿using API.APIModels.User;
-using AutoMapper;
-using BlogDALLibrary.Entities;
+﻿using AutoMapper;
 using BlogDALLibrary.Repositories;
-using ServicesLibrary;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
+using ServicesLibrary;
 using ServicesLibrary.Models.User;
+using System.Threading.Tasks;
 
 namespace API.Controllers
 {
@@ -20,19 +17,23 @@ namespace API.Controllers
             _userService = userService;
         }
 
+        /// <summary>
+        /// Registers new user
+        /// </summary>
+        /// <param name="userRegistrationModel">Model for user registration.</param>
+        /// <returns>Registration result.</returns>
+        /// <response code="200">New user was registered.</response>
+        /// <response code="400">If UserRegistrationModel is null.</response>
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationModel userRegistrationModel )
+        public async Task<IActionResult> Register([FromBody] UserRegistrationModel userRegistrationModel)
         {
-            try
+            if (userRegistrationModel == null) 
             {
-                await _userService.Register(userRegistrationModel);
-                return Ok();
+                return BadRequest("UserRegistrationModel cannot be null");
             }
-            catch (Exception)
-            {
+            await _userService.Register(userRegistrationModel);
+            return Ok();
 
-                throw;
-            }
         }
     }
 }

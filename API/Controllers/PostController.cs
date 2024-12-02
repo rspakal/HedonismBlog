@@ -1,106 +1,120 @@
-﻿using API.APIModels.Post;
-using AutoMapper;
-using BlogDALLibrary.Entities;
-using BlogDALLibrary.Repositories;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
+using ServicesLibrary;
+using ServicesLibrary.Models.Post;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace API.Controllers
 {
-    [Route("api")]
-    [ApiController]
-    public class PostController : ControllerBase
+    public class PostController : BlogAPIBaseController
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IPostRepository _postRepository;
-        private readonly IMapper _mapper;
+        private readonly IPostService _postService;
 
-        public PostController(IUserRepository userRepository, IPostRepository postRepository, IMapper mapper)
+        public PostController(IPostService postService)
         {
-            _userRepository = userRepository;
-            _postRepository = postRepository;
-            _mapper = mapper;
+            _postService = postService;
         }
 
+        /// <summary>
+        /// Shows all post previews. Allowed to all
+        /// </summary>
+        /// <returns>All posts preview.</returns>
+        /// <response code="200">Returns all post preview.</response>
         [HttpGet("posts")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> Index()
         {
-            var _posts = await _postRepository.GetAllAsNoTracking();
-            var _postPreviewAPIModels = _mapper.Map<List<PostPreviewAPIModel>>(_posts);
-            return Ok(_postPreviewAPIModels);
+            var _postPreviewModels = await _postService.GetAllAsync();
+            return Ok(_postPreviewModels);
         }
 
-        [HttpGet("post/view")]
-        [Authorize]
-        public async Task<IActionResult> View(int id)
+        /// <summary>
+        /// Shows post with content and comments.
+        /// </summary>
+        /// <param name="id">Post id.</param>
+        /// <returns>Post view.</returns>
+        /// <response code="200">Returns Post view.</response>
+        /// <response code="400">If post id has incorrect value.</response>
+        [HttpGet("post")]
+        public async Task<IActionResult> View([FromQuery] int id)
         {
-            if (id == 0)
+            if (id < 1)
             {
-                throw new ArgumentNullException(nameof(id), "Post id is zero or null");
+                return BadRequest("Id cannot be less then 1.");
+
             }
-            var _post = await _postRepository.GetAsNoTracking(id);
-            var _postViewAPIModel = _mapper.Map<PostViewAPIModel>(_post);
+
+            var _postViewAPIModel = await _postService.GetAsync(id);
             return Ok(_postViewAPIModel);
         }
 
+        /// <summary>
+        /// Creates new post.
+        /// </summary>
+        /// <param name="postCreateModel">Model fro creating new post.</param>
+        /// <returns>Creating post result.</returns>
+        /// <response code="200">Post was created.</response>
+        /// <response code="400">If PostCreateModel is null.</response>
         [HttpPost("post/create")]
         [Authorize]
-        public async Task<IActionResult> Create([FromBody] PostCreateAPIModel postCreateAPIModel)
+        public async Task<IActionResult> Create([FromBody] PostCreateModel postCreateModel)
         {
-            if (postCreateAPIModel == null)
+
+            if (postCreateModel == null)
             {
-                throw new ArgumentNullException(nameof(postCreateAPIModel), "Aegument 'PostCreateAPIModel' is null");
+                return BadRequest("PostCreateModel cannot be null.");
             }
-            var _user = _mapper.Map<Post>(postCreateAPIModel);
-            await _postRepository.Create(_user);
+
+            await _postService.CreateAsync(postCreateModel);
             return Ok();
         }
 
-        [HttpPut("post/update")]
+
+        /// <summary>
+        /// Edits existing post. Allowed to comment author, administartor and moderator
+        /// </summary>
+        /// <param name="postUpdateModel">Model for editing existing post.</param>
+        /// <returns>Editing post result.</returns>
+        /// <response code="200">Post was edited.</response>
+        /// <response code="400">If PostUpdateModel is null.</response>
+        [HttpPut("post/edit")]
         [Authorize]
-        public async Task<IActionResult> Edit([FromBody] PostUpdateAPIModel postUpdateAPIModel)
+        public async Task<IActionResult> Edit([FromBody] PostUpdateModel postUpdateModel)
         {
-            if (postUpdateAPIModel == null)
+            if (postUpdateModel == null)
             {
-                throw new ArgumentNullException(nameof(postUpdateAPIModel), "Argument 'PostUpdateAPIModel' is null");
+                return BadRequest("PostCreateModel cannot be null.");
             }
-            var _contextUser = HttpContext.User;
-            var _contextUserEmail = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var _contextUserRole = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-            if (_contextUserEmail != postUpdateAPIModel.UserEmail && _contextUserRole != "administrator" && _contextUserRole == "moderator")
-            {
-                return Forbid();
-            }
-            var _post = _mapper.Map<Post>(postUpdateAPIModel);
-            await _postRepository.Update(_post);
+            var _currentUserEmail = GetClaimValue(ClaimTypes.Email);
+            var _currentUserRole = GetClaimValue(ClaimTypes.Role);
+
+            await _postService.Update(postUpdateModel, _currentUserEmail, _currentUserRole);
             return Ok();
         }
 
+        /// <summary>
+        /// Delets a post. Allowed to comment author, administartor and moderator
+        /// </summary>
+        /// <param name="postId">Post id.</param>
+        /// <returns>Deleting post result.</returns>
+        /// <response code="200">Post was deleted.</response>
+        /// <response code="400">If post id has incorrect value.</response>
         [HttpDelete("post/delete")]
         [Authorize]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete([FromQuery] int postId)
         {
-            if (id == 0)
+            if (postId < 1)
             {
-                throw new ArgumentNullException(nameof(id), "Post id is zero or null");
+                return BadRequest("Id cannot be less then 1.");
             }
-            var _post = await _postRepository.Get(id);
-            var _contextUser = HttpContext.User;
-            var _contextUserEmail = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var _contextUserRole = _contextUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-            if (_contextUserEmail != _post.User.Email && _contextUserRole != "administrator" && _contextUserRole == "moderator")
-            {
-                return Forbid();
-            }
-            await _postRepository.Delete(_post);
+            var _currentUserEmail = GetClaimValue(ClaimTypes.Email);
+            var _currentUserRole = GetClaimValue(ClaimTypes.Role);
+
+            await _postService.DeleteAsync(postId, _currentUserEmail, _currentUserRole);
             return Ok();
+
         }
     }
 }
