@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BlogDALLibrary.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServicesLibrary;
 using ServicesLibrary.Models;
@@ -46,8 +47,15 @@ namespace API.Controllers
                 return BadRequest("RoleMode cannot be null");
             }
 
-            await _roleService.CreateAsync(roleModel);
-            return Ok();
+            try
+            {
+                await _roleService.CreateAsync(roleModel);
+                return Ok();
+            }
+            catch (UniqueConstraintException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>
