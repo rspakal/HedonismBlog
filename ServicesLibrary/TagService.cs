@@ -22,11 +22,6 @@ namespace ServicesLibrary
         }
         public async Task CreateAsync(TagModel tagModel)
         {
-            if ((await _tagRepository.Get(tagModel.Text) != null))
-            {
-                throw new Exception($"{tagModel.Text} is already exist");
-            }
-
             var _tag = _mapper.Map<Tag>(tagModel);
             await _tagRepository.Create(_tag);
         }

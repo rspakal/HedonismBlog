@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BlogDALLibrary.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ServicesLibrary;
 using ServicesLibrary.Models;
+using ServicesLibrary.Models.User;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -44,9 +46,18 @@ namespace HedonismBlog.Controllers
             {
                 return View("Create");
             }
-            await _roleService.CreateAsync(roleModel);
-            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' created '{roleModel.Name}' role'");
-            return RedirectToAction("Index", "Role");
+
+            try
+            {
+                await _roleService.CreateAsync(roleModel);
+                _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' created '{roleModel.Name}' role'");
+                return RedirectToAction("Index", "Role");
+            }
+            catch(UniqueConstraintException ex)
+            {
+                ModelState.AddModelError(nameof(roleModel.Name), $"A role '{roleModel.Name}' already exists.");
+                return View(roleModel);
+            }
         }
 
         [HttpGet]

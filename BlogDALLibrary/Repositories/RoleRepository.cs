@@ -1,5 +1,7 @@
 ﻿
 using BlogDALLibrary.Entities;
+using BlogDALLibrary.Exceptions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -17,8 +19,15 @@ namespace BlogDALLibrary.Repositories
 
         public async Task Create(Role role)
         {
-            await _context.Roles.AddAsync(role);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.Roles.AddAsync(role);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
+            {
+                throw new UniqueConstraintException($"Role '{role.Name}' already exists.", ex);
+            }
         }
 
         public async Task<Role> Get(int id)

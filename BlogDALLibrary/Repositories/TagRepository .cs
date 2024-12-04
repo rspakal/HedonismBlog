@@ -1,4 +1,6 @@
 ﻿using BlogDALLibrary.Entities;
+using BlogDALLibrary.Exceptions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
@@ -16,10 +18,23 @@ namespace BlogDALLibrary.Repositories
         }
         public async Task<Tag> Create(Tag tag)
         {
-            tag.Text = tag.Text.ToLower();
-            await _context.Tags.AddAsync(tag);
-            await _context.SaveChangesAsync();
-            return await GetByName(tag.Text);
+            if (tag == null)
+            {
+                throw new ArgumentNullException(nameof(tag));
+            }
+
+            try
+            {
+                tag.Text = tag.Text.ToLower();
+                await _context.Tags.AddAsync(tag);
+                await _context.SaveChangesAsync();
+                return await GetByName(tag.Text);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
+            {
+                throw new UniqueConstraintException($"Tag '{tag.Text}' already exists.", ex);
+            }
+
         }
 
         public async Task Delete(int id)

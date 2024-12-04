@@ -14,6 +14,7 @@ using System.IO;
 using System.Reflection;
 using System;
 using System.Text;
+using System.Runtime.InteropServices;
 
 
 namespace API
@@ -93,7 +94,10 @@ namespace API
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPostService, PostService>();
+            services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<ITagService, TagService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

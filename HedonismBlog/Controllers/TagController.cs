@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BlogDALLibrary.Exceptions;
 using BlogDALLibrary.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +39,7 @@ namespace HedonismBlog.Controllers
 
         [HttpGet]
         [Route("tag/create")]
-        public IActionResult Create() 
+        public IActionResult Create()
         {
             return View();
         }
@@ -48,14 +49,22 @@ namespace HedonismBlog.Controllers
         [Route("tag/create")]
         public async Task<IActionResult> Create(TagModel tagModel)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return View("Create");
             }
 
-            await _tagService.CreateAsync(tagModel);
-            _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' created '{tagModel.Text}' tag'");
-            return RedirectToAction("Index", "Tag");
+            try
+            {
+                await _tagService.CreateAsync(tagModel);
+                _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' created '{tagModel.Text}' tag'");
+                return RedirectToAction("Index", "Tag");
+            }
+            catch (UniqueConstraintException ex)
+            {
+                ModelState.AddModelError(nameof(tagModel.Text), "Same tag already exists.");
+                return View(tagModel);
+            }
         }
 
         [HttpGet]
@@ -68,7 +77,7 @@ namespace HedonismBlog.Controllers
 
         [HttpPost]
         [Route("tag/edit")]
-        public async Task<IActionResult> Edit(TagModel tagModel) 
+        public async Task<IActionResult> Edit(TagModel tagModel)
         {
             if (!ModelState.IsValid)
             {

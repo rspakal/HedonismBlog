@@ -4,6 +4,9 @@ using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 using BlogDALLibrary.Entities;
+using BlogDALLibrary.Exceptions;
+using Microsoft.Data.Sqlite;
+using System;
 
 
 namespace BlogDALLibrary.Repositories
@@ -18,11 +21,24 @@ namespace BlogDALLibrary.Repositories
 
         public async Task<User> Create(User user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
             user.Email = user.Email.ToLower();
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            var _user = await Get(user.Id);
-            return _user;
+
+            try
+            {
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+                var _user = await Get(user.Id);
+                return _user;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19)
+            {
+                throw new UniqueConstraintException("Email already exists.", ex);
+            }
         }
 
         public async Task Delete(int id)

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace HedonismBlog.Controllers
 {
     [Authorize]
-    public class CommentController : Controller
+    public class CommentController : BlogMVCBaseController
     {
         private readonly ICommentService _commentService;
         private readonly ILogger<HomeController> _logger;
@@ -38,7 +38,10 @@ namespace HedonismBlog.Controllers
         [Route("comment/edit")]
         public IActionResult Edit(PostViewModel postViewModel)
         {
-            _commentService.Update(postViewModel);
+            var _currentUserEmail = GetClaimValue(ClaimTypes.Email);
+            var _currentUserRole = GetClaimValue(ClaimTypes.Role);
+
+            _commentService.Update(postViewModel, _currentUserEmail, _currentUserRole);
             return View();
         }
 
@@ -47,8 +50,11 @@ namespace HedonismBlog.Controllers
         [Route("comment/delete")]
         public async Task<IActionResult> Delete(int id)
         {
+            var _currentUserEmail = GetClaimValue(ClaimTypes.Email);
+            var _currentUserRole = GetClaimValue(ClaimTypes.Role);
+
             var _comment = await _commentService.GetAsNoTrackingAsync(id);
-            await _commentService.DeleteAsync(id);
+            await _commentService.DeleteAsync(id, _currentUserEmail, _currentUserRole);
 
             _logger.LogInformation($"User action: '{HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value}' deleted comment");
             return RedirectToAction("View", "Post", new { id = _comment.PostId });

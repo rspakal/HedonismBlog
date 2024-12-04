@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BlogDALLibrary.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServicesLibrary;
 using ServicesLibrary.Models;
@@ -35,7 +36,7 @@ namespace API.Controllers
         /// <param name="tagModel">Model for tag.</param>
         /// <returns>Creating tag result .</returns>
         /// <response code="200">Tag was created.</response>
-        /// <response code="400">If tagModel is null.</response>
+        /// <response code="400">If tagModel is null or tag with the same name already exists</response>
         [HttpPost("tag/create")]
         public async Task<IActionResult> Create([FromBody] TagModel tagModel)
         {
@@ -43,9 +44,15 @@ namespace API.Controllers
             {
                 return BadRequest("TagModel cannot be null.");
             }
-
-            await _tagService.CreateAsync(tagModel);
-            return Ok();
+            try
+            {
+                await _tagService.CreateAsync(tagModel);
+                return Ok();
+            }
+            catch (UniqueConstraintException ex) 
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>

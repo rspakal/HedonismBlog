@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BlogDALLibrary.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ServicesLibrary;
 using ServicesLibrary.Models.User;
@@ -32,9 +33,17 @@ namespace HedonismBlog.Controllers
             {
                 return View(userRegistrationModel);
             }
-            await _userService.Register(userRegistrationModel);
-            _logger.LogInformation($"User action:New user with email {userRegistrationModel.Email} registered");
-            return View("RegisterSucceed");
+            try
+            {
+                await _userService.Register(userRegistrationModel);
+                _logger.LogInformation($"User action:New user with email {userRegistrationModel.Email} registered");
+                return View("RegisterSucceed");
+            }
+            catch (UniqueConstraintException ex)
+            {
+                ModelState.AddModelError(nameof(userRegistrationModel.Email), "A user with this email already exists.");
+                return View(userRegistrationModel);
+            }
         }
     }
 }

@@ -39,10 +39,10 @@ namespace ServicesLibrary
         public async Task Register(UserRegistrationModel userRegistrationModel)
         {
             var _user = await _userRepository.Get(userRegistrationModel.Email);
-            if (_user != null)
-            {
-                throw new Exception("User with the same email is already registered");
-            }
+            //if (_user != null)
+            //{
+            //    throw new Exception("User with the same email is already registered");
+            //}
             var _role = await _roleRepository.Get("user");
             if (_role == null)
                 throw new NullReferenceException($"No role with the name \"user\" in DB");

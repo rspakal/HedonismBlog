@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BlogDALLibrary.Exceptions;
 using BlogDALLibrary.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using ServicesLibrary;
@@ -31,8 +32,15 @@ namespace API.Controllers
             {
                 return BadRequest("UserRegistrationModel cannot be null");
             }
-            await _userService.Register(userRegistrationModel);
-            return Ok();
+            try
+            {
+                await _userService.Register(userRegistrationModel);
+                return Ok();
+            }
+            catch (UniqueConstraintException ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
         }
     }
